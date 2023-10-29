@@ -41,6 +41,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 // Libaria2: The aim of this library is provide same functionality
 // available in RPC methods. The function signatures are not
