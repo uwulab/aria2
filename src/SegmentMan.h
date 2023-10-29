@@ -79,6 +79,8 @@ private:
 
   std::shared_ptr<PieceStorage> pieceStorage_;
 
+  bool reportSegmentCompletion_;
+
   SegmentEntries usedSegmentEntries_;
 
   // Remember writtenLength for each segment. The key is an index of a
@@ -174,6 +176,8 @@ public:
    * Tells SegmentMan that the segment has been downloaded successfully.
    */
   bool completeSegment(cuid_t cuid, const std::shared_ptr<Segment>& segment);
+
+  void setReportSegmentCompletion(bool report);
 
   /**
    * Injects PieceStorage.

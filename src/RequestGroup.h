@@ -117,6 +117,8 @@ private:
 
   RequestGroupMan* requestGroupMan_;
 
+  bool reportSegmentCompletion_;
+
 #ifdef ENABLE_BITTORRENT
   BtRuntime* btRuntime_;
 
@@ -289,6 +291,8 @@ public:
   // downloadContext->setOwnerRequestGroup(this).
   void
   setDownloadContext(const std::shared_ptr<DownloadContext>& downloadContext);
+
+  void setReportSegmentCompletion(bool report);
 
   const std::shared_ptr<PieceStorage>& getPieceStorage() const
   {

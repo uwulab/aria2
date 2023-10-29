@@ -2,7 +2,7 @@
 /*
  * aria2 - The high speed download utility
  *
- * Copyright (C) 2012 Tatsuhiro Tsujikawa
+ * Copyright (C) 2013 Tatsuhiro Tsujikawa
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,40 +32,23 @@
  * files in the program, then also delete it here.
  */
 /* copyright --> */
-#include "Notifier.h"
+#include "ApiCallbackSegmentEventListener.h"
 #include "RequestGroup.h"
-#include "LogFactory.h"
 
 namespace aria2 {
 
-Notifier::Notifier() {}
-
-Notifier::~Notifier() = default;
-
-void Notifier::addDownloadEventListener(DownloadEventListener* listener)
+ApiCallbackSegmentEventListener::ApiCallbackSegmentEventListener(
+    Session* session, SegmentEventCallback callback, void* userData)
+    : session_(session), callback_(callback), userData_(userData)
 {
-  listeners_.push_back(listener);
 }
 
-void Notifier::notifyDownloadEvent(DownloadEvent event,
-                                   const RequestGroup* group)
-{
-  for (auto listener : listeners_) {
-    listener->onEvent(event, group);
-  }
-}
+ApiCallbackSegmentEventListener::~ApiCallbackSegmentEventListener() = default;
 
-void Notifier::addSegmentEventListener(SegmentEventListener* listener)
+void ApiCallbackSegmentEventListener::onEvent(const RequestGroup* group,
+                                              const std::shared_ptr<Segment>& segment)
 {
-  segment_listeners_.push_back(listener);
-}
-
-void Notifier::notifySegmentEvent(const RequestGroup* group,
-                                  const std::shared_ptr<Segment>& segment)
-{
-  for (auto listener : segment_listeners_) {
-    listener->onEvent(group, segment);
-  }
+  callback_(session_, segment, group->getGID(), userData_);
 }
 
 } // namespace aria2

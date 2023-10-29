@@ -474,7 +474,7 @@ public:
 void createRequestGroupForUri(
     std::vector<std::shared_ptr<RequestGroup>>& result,
     const std::shared_ptr<Option>& option, const std::vector<std::string>& uris,
-    bool ignoreForceSequential, bool ignoreLocalPath, bool throwOnError)
+    bool ignoreForceSequential, bool ignoreLocalPath, bool throwOnError, bool reportSegmentCompletion)
 {
   std::vector<std::string> nargs;
   if (option->get(PREF_PARAMETERIZED_URI) == A2_V_TRUE) {
@@ -500,6 +500,7 @@ void createRequestGroupForUri(
       splitURI(streamURIs, std::begin(nargs), strmProtoEnd, numSplit, numIter);
       try {
         auto rg = createRequestGroup(option, streamURIs, true);
+        rg->setReportSegmentCompletion(reportSegmentCompletion);
         rg->setNumConcurrentCommand(numSplit);
         result.push_back(rg);
       }

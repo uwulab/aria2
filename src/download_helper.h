@@ -125,7 +125,7 @@ void createRequestGroupForUri(
     std::vector<std::shared_ptr<RequestGroup>>& result,
     const std::shared_ptr<Option>& option, const std::vector<std::string>& uris,
     bool ignoreForceSequential = false, bool ignoreLocalPath = false,
-    bool throwOnError = false);
+    bool throwOnError = false, bool reportSegmentCompletion = false);
 
 template <typename InputIterator>
 void setMetadataInfo(InputIterator first, InputIterator last,

@@ -60,6 +60,7 @@ namespace aria2 {
  * :func:`sessionNew()` function.
  */
 struct Session;
+class Segment;
 
 /**
  * @function
@@ -146,6 +147,22 @@ typedef int (*DownloadEventCallback)(Session* session, DownloadEvent event,
                                      A2Gid gid, void* userData);
 
 /**
+ * @functypedef
+ *
+ * Callback function invoked when segment event occurred. The |segment|
+ * indicates the completed segment. See :type:`DownloadEvent` for events. The
+ * |gid| refers to the download which this event was fired on. The
+ * |userData| is a pointer specified in
+ * :member:`SessionConfig::userData`.
+ *
+ * At the moment, the return value is ignored, but the implementation
+ * of this callback should return 0 for compatibility.
+ */
+typedef int (*SegmentEventCallback)(Session* session, 
+                                    const std::shared_ptr<Segment>& segment,
+                                    A2Gid gid, void* userData);
+
+/**
  * @struct
  *
  * The configuration for the session.
@@ -187,6 +204,7 @@ struct SessionConfig {
    * event. The default value is ``NULL``.
    */
   DownloadEventCallback downloadEventCallback;
+  SegmentEventCallback segmentEventCallback;
   /**
    * Pointer to user defined data. libaria2 treats this as opaque
    * pointer and will not free it. The default value is ``NULL``.
@@ -292,6 +310,8 @@ bool isNull(A2Gid gid);
  * returns 0 if it succeeds, or negative error code.
  */
 int addUri(Session* session, A2Gid* gid, const std::vector<std::string>& uris,
+           const KeyVals& options, int position = -1);
+int addDiso(Session* session, A2Gid* gid, const std::vector<std::string>& uris,
            const KeyVals& options, int position = -1);
 
 /**

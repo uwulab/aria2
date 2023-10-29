@@ -617,6 +617,7 @@ void RequestGroup::initPieceStorage()
   }
   segmentMan_ =
       std::make_shared<SegmentMan>(downloadContext_, tempPieceStorage);
+  segmentMan_->setReportSegmentCompletion(this->reportSegmentCompletion_);
   pieceStorage_ = tempPieceStorage;
 
 #ifdef __MINGW32__
@@ -1311,6 +1312,11 @@ void RequestGroup::setDownloadContext(
   if (downloadContext_) {
     downloadContext_->setOwnerRequestGroup(this);
   }
+}
+
+void RequestGroup::setReportSegmentCompletion(bool report)
+{
+  reportSegmentCompletion_ = report;
 }
 
 bool RequestGroup::p2pInvolved() const

@@ -62,6 +62,7 @@
 #include "SingletonHolder.h"
 #include "Notifier.h"
 #include "ApiCallbackDownloadEventListener.h"
+#include "ApiCallbackSegmentEventListener.h"
 #ifdef ENABLE_BITTORRENT
 #  include "bittorrent_helper.h"
 #endif // ENABLE_BITTORRENT
@@ -79,6 +80,7 @@ SessionConfig::SessionConfig()
     : keepRunning(false),
       useSignalHandler(true),
       downloadEventCallback(nullptr),
+      segmentEventCallback(nullptr),
       userData(nullptr)
 {
 }
@@ -136,6 +138,12 @@ Session* sessionNew(const KeyVals& options, const SessionConfig& config)
           session.get(), config.downloadEventCallback, config.userData);
       SingletonHolder<Notifier>::instance()->addDownloadEventListener(
           session->listener.get());
+    }
+    if (config.segmentEventCallback) {
+      session->segment_listener = make_unique<ApiCallbackSegmentEventListener>(
+          session.get(), config.segmentEventCallback, config.userData);
+      SingletonHolder<Notifier>::instance()->addSegmentEventListener(
+          session->segment_listener.get());
     }
   }
   else {
@@ -279,6 +287,33 @@ int addUri(Session* session, A2Gid* gid, const std::vector<std::string>& uris,
   createRequestGroupForUri(result, requestOption, uris,
                            /* ignoreForceSeq = */ true,
                            /* ignoreLocalPath = */ true);
+  if (!result.empty()) {
+    addRequestGroup(result.front(), e.get(), position);
+    if (gid) {
+      *gid = result.front()->getGID();
+    }
+  }
+  return 0;
+}
+
+int addDiso(Session* session, A2Gid* gid, const std::vector<std::string>& uris,
+           const KeyVals& options, int position)
+{
+  auto& e = session->context->reqinfo->getDownloadEngine();
+  auto requestOption = std::make_shared<Option>(*e->getOption());
+  try {
+    apiGatherRequestOption(requestOption.get(), options,
+                           OptionParser::getInstance());
+  }
+  catch (RecoverableException& e) {
+    A2_LOG_INFO_EX(EX_EXCEPTION_CAUGHT, e);
+    return -1;
+  }
+  std::vector<std::shared_ptr<RequestGroup>> result;
+  createRequestGroupForUri(result, requestOption, uris,
+                           /* ignoreForceSeq = */ true,
+                           /* ignoreLocalPath = */ true,
+                           /* reportSegmentCompletion */ true);
   if (!result.empty()) {
     addRequestGroup(result.front(), e.get(), position);
     if (gid) {

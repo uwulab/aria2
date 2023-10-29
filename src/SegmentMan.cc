@@ -45,6 +45,8 @@
 #include "GrowSegment.h"
 #include "LogFactory.h"
 #include "Logger.h"
+#include "Notifier.h"
+#include "SingletonHolder.h"
 #include "PieceStorage.h"
 #include "PeerStat.h"
 #include "Option.h"
@@ -376,6 +378,10 @@ bool SegmentMan::completeSegment(cuid_t cuid,
   pieceStorage_->completePiece(segment->getPiece());
   pieceStorage_->advertisePiece(cuid, segment->getPiece()->getIndex(),
                                 global::wallclock());
+  if (reportSegmentCompletion_) {
+    auto group = downloadContext_->getOwnerRequestGroup();
+    SingletonHolder<Notifier>::instance()->notifySegmentEvent(group, segment);
+  }
   auto itr = std::find_if(usedSegmentEntries_.begin(),
                           usedSegmentEntries_.end(), FindSegmentEntry(segment));
   if (itr == usedSegmentEntries_.end()) {
@@ -385,6 +391,10 @@ bool SegmentMan::completeSegment(cuid_t cuid,
     usedSegmentEntries_.erase(itr);
     return true;
   }
+}
+
+void SegmentMan::setReportSegmentCompletion(bool report) {
+  reportSegmentCompletion_ = report;
 }
 
 bool SegmentMan::hasSegment(size_t index) const
